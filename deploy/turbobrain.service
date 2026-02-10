@@ -3,10 +3,9 @@ Description=turbobrain.me website
 After=network.target
 
 [Service]
-User=pi
-WorkingDirectory=/home/pi/turbobrain_website/backend
-EnvironmentFile=/home/pi/turbobrain_website/.env
-ExecStart=/home/pi/turbobrain_website/venv/bin/gunicorn "app:create_app()" -c /home/pi/turbobrain_website/deploy/gunicorn.conf.py
+User=shishpi
+WorkingDirectory=/home/shishpi/turbobrain.me
+ExecStart=/home/shishpi/turbobrain.me/start.sh
 Restart=always
 RestartSec=5
 
