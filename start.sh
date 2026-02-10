@@ -11,6 +11,17 @@ fi
 # Activate venv
 source "$DIR/venv/bin/activate"
 
-# Start gunicorn
+# Start gunicorn in background
 cd "$DIR/backend"
-exec gunicorn "app:create_app()" -c "$DIR/deploy/gunicorn.conf.py"
+gunicorn "app:create_app()" -c "$DIR/deploy/gunicorn.conf.py" &
+GUNICORN_PID=$!
+
+# Start ngrok tunnel
+ngrok http 8000 --log=stdout &
+NGROK_PID=$!
+
+# Clean up both on exit
+trap "kill $GUNICORN_PID $NGROK_PID 2>/dev/null" EXIT
+
+echo "Gunicorn running on :8000, ngrok tunnel starting..."
+wait
