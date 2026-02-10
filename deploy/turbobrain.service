@@ -1,0 +1,14 @@
+[Unit]
+Description=turbobrain.me website
+After=network.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/turbobrain_website/backend
+EnvironmentFile=/home/pi/turbobrain_website/.env
+ExecStart=/home/pi/turbobrain_website/venv/bin/gunicorn "app:create_app()" -c /home/pi/turbobrain_website/deploy/gunicorn.conf.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
