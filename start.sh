@@ -16,12 +16,12 @@ cd "$DIR/backend"
 gunicorn "app:create_app()" -c "$DIR/deploy/gunicorn.conf.py" &
 GUNICORN_PID=$!
 
-# Start ngrok tunnel
-ngrok http 8000 --log=stdout &
-NGROK_PID=$!
+# Start cloudflare tunnel
+cloudflared tunnel --url http://localhost:8000 &
+TUNNEL_PID=$!
 
 # Clean up both on exit
-trap "kill $GUNICORN_PID $NGROK_PID 2>/dev/null" EXIT
+trap "kill $GUNICORN_PID $TUNNEL_PID 2>/dev/null" EXIT
 
-echo "Gunicorn running on :8000, ngrok tunnel starting..."
+echo "Gunicorn running on :8000, cloudflare tunnel starting..."
 wait
