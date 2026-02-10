@@ -2,6 +2,7 @@ import os
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 from dotenv import load_dotenv
+from sqlalchemy import inspect
 
 load_dotenv()
 
@@ -15,7 +16,8 @@ def create_app():
     db.init_app(app)
 
     with app.app_context():
-        db.create_all()
+        if not inspect(db.engine).get_table_names():
+            db.create_all()
 
     from routes.auth import auth_bp
     from routes.blog import blog_bp
