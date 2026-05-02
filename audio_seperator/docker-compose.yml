@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  audio-separator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: audio-separator
+    ports:
+      - "8080:5000"
+    environment:
+      - HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}
+    volumes:
+      # Persist uploads and outputs
+      - ./uploads:/app/uploads
+      - ./outputs:/app/outputs
+      # Optional: Mount .env file for local development
+      - ./.env:/app/.env:ro
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # Cloudflare Tunnel (optional - uncomment to use)
+  # cloudflared:
+  #   image: cloudflare/cloudflared:latest
+  #   container_name: cloudflared-tunnel
+  #   command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - audio-separator

@@ -146,13 +146,54 @@ button:disabled {
   background: #dc2626;
 }
 
+/* === Penguin Mascot === */
+.penguin-float {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 50;
+}
+
+.penguin-wrap {
+  animation: penguin-bob 3s ease-in-out infinite;
+}
+
+@keyframes penguin-bob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
 /* === Landing / Hero === */
 .landing {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 60vh;
+}
+
+.hero {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 3rem;
+}
+
+.hero-text {
+  flex: 1;
   text-align: center;
+}
+
+.hero-mascot {
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--accent);
+  margin-bottom: 1rem;
 }
 
 .hero h1 {
@@ -194,6 +235,12 @@ button:disabled {
   display: flex;
   gap: 1rem;
   justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.connect-cta {
+  font-size: 0.9rem;
+  color: var(--text-dim);
 }
 
 /* === Blog === */
@@ -343,6 +390,14 @@ button:disabled {
   border-radius: 999px;
   font-size: 0.75rem;
   border: 1px solid var(--border);
+}
+
+.wip-badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  font-style: italic;
+  opacity: 0.75;
 }
 
 /* === Socials === */
@@ -590,6 +645,14 @@ h1 {
 
 /* === Responsive === */
 @media (max-width: 640px) {
+  .hero {
+    flex-direction: column;
+  }
+
+  .hero-mascot {
+    order: -1;
+  }
+
   .hero h1 {
     font-size: 2rem;
   }

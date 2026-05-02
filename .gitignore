@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 venv/
+my_env/
 .venv/
 
 # Node
@@ -12,18 +13,36 @@ dist/
 # Built frontend served by Flask
 backend/static/
 
-# Environment
+# Environment / secrets
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*_rsa
+*_dsa
+*.p12
+credentials.json
+secrets.json
 
 # SQLite
 *.db
 
-# Uploads
+# Uploads / runtime outputs
 backend/uploads/
+outputs/
+audio_seperator/uploads/
+audio_seperator/outputs/
+
+# Logs
+*.log
 
 # IDE
 .vscode/
 .idea/
+.claude/settings.local.json
 
 # OS
 .DS_Store
+Thumbs.db

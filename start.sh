@@ -17,7 +17,7 @@ gunicorn "app:create_app()" -c "$DIR/deploy/gunicorn.conf.py" &
 GUNICORN_PID=$!
 
 # Start cloudflare tunnel
-cloudflared tunnel --url http://localhost:8000 &
+cloudflared tunnel --protocol http2 --url http://localhost:8000 &
 TUNNEL_PID=$!
 
 # Clean up both on exit

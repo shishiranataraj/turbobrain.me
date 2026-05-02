@@ -23,10 +23,12 @@ def create_app():
     from routes.blog import blog_bp
     from routes.projects import projects_bp
     from routes.uploads import uploads_bp
+    from routes.audio_separator import audio_separator_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(blog_bp)
     app.register_blueprint(projects_bp)
     app.register_blueprint(uploads_bp)
+    app.register_blueprint(audio_separator_bp)
 
     static_dir = os.path.join(os.path.dirname(__file__), "static")
 

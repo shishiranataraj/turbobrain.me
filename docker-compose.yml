@@ -1,0 +1,54 @@
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - db_data:/app/backend/instance
+    depends_on:
+      audio-separator:
+        condition: service_started
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  audio-separator:
+    build: ./audio_seperator
+    env_file:
+      - .env
+    volumes:
+      - audio_uploads:/app/uploads
+      - audio_outputs:/app/outputs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate --protocol http2 --grace-period 30s run
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    stop_grace_period: 10s
+
+volumes:
+  db_data:
+  audio_uploads:
+  audio_outputs:

@@ -1,0 +1,9 @@
+flask==3.0.0
+demucs==4.0.1
+werkzeug==3.0.1
+openai-whisper>=20250625
+pyannote.audio==3.3.2
+python-dotenv>=1.0.0
+yt-dlp
+gunicorn>=22.0.0
+gevent>=24.0

@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Source Separator</title>
+    <link rel="stylesheet" href="/audio-separator/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Audio Source Separator</h1>
+            <p>Separate music tracks OR transcribe speech with speaker detection</p>
+        </header>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" id="musicModeBtn" data-mode="music">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18V5l12-2v13"></path>
+                    <circle cx="6" cy="18" r="3"></circle>
+                    <circle cx="18" cy="16" r="3"></circle>
+                </svg>
+                Music Separation
+            </button>
+            <button class="mode-btn" id="speechModeBtn" data-mode="speech">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+                Speech Transcription
+            </button>
+        </div>
+
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <h3>Drop your audio file here</h3>
+                <p>or click to browse</p>
+                <p class="file-types">Supported: MP3, WAV, FLAC, M4A, OGG</p>
+                <input type="file" id="fileInput" accept=".mp3,.wav,.flac,.m4a,.ogg" hidden>
+            </div>
+
+            <div class="or-divider">
+                <span>or</span>
+            </div>
+
+            <div class="youtube-input" id="youtubeInput">
+                <div class="youtube-row">
+                    <input type="text" id="youtubeUrl" placeholder="Paste YouTube URL..." autocomplete="off">
+                    <button id="youtubeBtn" class="youtube-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0C.488 3.45.029 5.804 0 12c.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0C23.512 20.55 23.971 18.196 24 12c-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 4-8 4z"/>
+                        </svg>
+                        Go
+                    </button>
+                </div>
+            </div>
+
+            <div class="progress-section" id="progressSection" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p id="statusText">Uploading...</p>
+
+                <div class="logs-section">
+                    <div class="logs-header">
+                        <h3>Live Processing Logs</h3>
+                        <button class="toggle-logs-btn" id="toggleLogsBtn">Hide Logs</button>
+                    </div>
+                    <div class="logs-container" id="logsContainer"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tracks-section" id="tracksSection" style="display: none;">
+            <h2>Separated Tracks</h2>
+            <div class="merge-controls">
+                <p>Select tracks to merge:</p>
+                <button class="merge-btn" id="mergeBtn" disabled>Merge Selected Tracks</button>
+            </div>
+            <div class="tracks-grid">
+                <div class="track-card" data-track="vocals">
+                    <input type="checkbox" class="track-checkbox" data-track="vocals" id="checkbox-vocals">
+                    <label for="checkbox-vocals" class="checkbox-label"></label>
+                    <div class="track-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                            <line x1="12" y1="19" x2="12" y2="23"></line>
+                            <line x1="8" y1="23" x2="16" y2="23"></line>
+                        </svg>
+                    </div>
+                    <h3>Vocals</h3>
+                    <audio controls id="vocalsPlayer"></audio>
+                    <button class="download-btn" data-track="vocals">Download</button>
+                </div>
+
+                <div class="track-card" data-track="drums">
+                    <input type="checkbox" class="track-checkbox" data-track="drums" id="checkbox-drums">
+                    <label for="checkbox-drums" class="checkbox-label"></label>
+                    <div class="track-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="6"></circle>
+                            <circle cx="12" cy="12" r="2"></circle>
+                        </svg>
+                    </div>
+                    <h3>Drums</h3>
+                    <audio controls id="drumsPlayer"></audio>
+                    <button class="download-btn" data-track="drums">Download</button>
+                </div>
+
+                <div class="track-card" data-track="bass">
+                    <input type="checkbox" class="track-checkbox" data-track="bass" id="checkbox-bass">
+                    <label for="checkbox-bass" class="checkbox-label"></label>
+                    <div class="track-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M9 18V5l12-2v13"></path>
+                            <circle cx="6" cy="18" r="3"></circle>
+                            <circle cx="18" cy="16" r="3"></circle>
+                        </svg>
+                    </div>
+                    <h3>Bass</h3>
+                    <audio controls id="bassPlayer"></audio>
+                    <button class="download-btn" data-track="bass">Download</button>
+                </div>
+
+                <div class="track-card" data-track="other">
+                    <input type="checkbox" class="track-checkbox" data-track="other" id="checkbox-other">
+                    <label for="checkbox-other" class="checkbox-label"></label>
+                    <div class="track-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                            <polyline points="2 17 12 22 22 17"></polyline>
+                            <polyline points="2 12 12 17 22 12"></polyline>
+                        </svg>
+                    </div>
+                    <h3>Other</h3>
+                    <audio controls id="otherPlayer"></audio>
+                    <button class="download-btn" data-track="other">Download</button>
+                </div>
+            </div>
+
+            <button class="reset-btn" id="resetBtn">Process Another File</button>
+        </div>
+
+        <div class="transcription-section" id="transcriptionSection" style="display: none;">
+            <h2>Transcription Results</h2>
+            <div class="transcription-card">
+                <h3>Full Transcription</h3>
+                <div class="transcription-text" id="fullTranscription"></div>
+                <button class="download-btn" id="downloadTranscriptBtn">Download Transcript</button>
+            </div>
+
+            <div class="segments-card">
+                <h3>Timestamped Segments</h3>
+                <div class="segments-list" id="segmentsList"></div>
+            </div>
+
+            <button class="reset-btn" id="resetTranscriptionBtn">Process Another File</button>
+        </div>
+    </div>
+
+    <script>
+        const BASE = '/audio-separator';
+        let currentJobId = null;
+        let eventSource = null;
+        let currentMode = 'music'; // default mode
+
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const progressSection = document.getElementById('progressSection');
+        const progressFill = document.getElementById('progressFill');
+        const statusText = document.getElementById('statusText');
+        const tracksSection = document.getElementById('tracksSection');
+        const transcriptionSection = document.getElementById('transcriptionSection');
+        const resetBtn = document.getElementById('resetBtn');
+        const resetTranscriptionBtn = document.getElementById('resetTranscriptionBtn');
+        const logsContainer = document.getElementById('logsContainer');
+        const toggleLogsBtn = document.getElementById('toggleLogsBtn');
+        const musicModeBtn = document.getElementById('musicModeBtn');
+        const speechModeBtn = document.getElementById('speechModeBtn');
+
+        // Start log streaming
+        function startLogStreaming() {
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            eventSource = new EventSource(BASE + '/logs');
+
+            eventSource.onmessage = function(event) {
+                const logLine = document.createElement('div');
+                logLine.className = 'log-line';
+                logLine.textContent = event.data;
+                logsContainer.appendChild(logLine);
+
+                // Auto-scroll to bottom
+                logsContainer.scrollTop = logsContainer.scrollHeight;
+            };
+
+            eventSource.onerror = function(error) {
+                console.error('EventSource error:', error);
+            };
+        }
+
+        // Toggle logs visibility
+        toggleLogsBtn.addEventListener('click', () => {
+            const isHidden = logsContainer.style.display === 'none';
+            logsContainer.style.display = isHidden ? 'block' : 'none';
+            toggleLogsBtn.textContent = isHidden ? 'Hide Logs' : 'Show Logs';
+        });
+
+        // Start log streaming on page load
+        startLogStreaming();
+
+        // Mode switching
+        musicModeBtn.addEventListener('click', () => {
+            currentMode = 'music';
+            musicModeBtn.classList.add('active');
+            speechModeBtn.classList.remove('active');
+        });
+
+        speechModeBtn.addEventListener('click', () => {
+            currentMode = 'speech';
+            speechModeBtn.classList.add('active');
+            musicModeBtn.classList.remove('active');
+        });
+
+        // Upload area click
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        async function handleFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('mode', currentMode);
+
+            // Show progress section
+            uploadArea.style.display = 'none';
+            document.getElementById('youtubeInput').style.display = 'none';
+            document.querySelector('.or-divider').style.display = 'none';
+            progressSection.style.display = 'block';
+            statusText.textContent = 'Uploading...';
+            progressFill.style.width = '10%';
+
+            try {
+                const response = await fetch(BASE + '/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(data.error);
+                    reset();
+                    return;
+                }
+
+                currentJobId = data.job_id;
+
+                if (currentMode === 'speech') {
+                    statusText.textContent = 'Transcribing speech... This may take a few minutes.';
+                } else {
+                    statusText.textContent = 'Separating audio tracks... This may take a few minutes.';
+                }
+
+                progressFill.style.width = '30%';
+
+                // Poll for status
+                pollStatus(currentJobId, currentMode);
+
+            } catch (error) {
+                alert('Upload failed: ' + error.message);
+                reset();
+            }
+        }
+
+        // YouTube URL submission
+        document.getElementById('youtubeBtn').addEventListener('click', () => handleYoutubeUrl());
+        document.getElementById('youtubeUrl').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleYoutubeUrl();
+        });
+
+        async function handleYoutubeUrl() {
+            const url = document.getElementById('youtubeUrl').value.trim();
+            if (!url) return;
+
+            // Show progress section
+            uploadArea.style.display = 'none';
+            document.getElementById('youtubeInput').style.display = 'none';
+            document.querySelector('.or-divider').style.display = 'none';
+            progressSection.style.display = 'block';
+            statusText.textContent = 'Downloading from YouTube...';
+            progressFill.style.width = '10%';
+
+            try {
+                const response = await fetch(BASE + '/youtube', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url, mode: currentMode })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(data.error);
+                    reset();
+                    return;
+                }
+
+                currentJobId = data.job_id;
+
+                if (currentMode === 'speech') {
+                    statusText.textContent = 'Transcribing speech... This may take a few minutes.';
+                } else {
+                    statusText.textContent = 'Separating audio tracks... This may take a few minutes.';
+                }
+
+                progressFill.style.width = '30%';
+                pollStatus(currentJobId, currentMode);
+
+            } catch (error) {
+                alert('Failed: ' + error.message);
+                reset();
+            }
+        }
+
+        async function pollStatus(jobId, mode) {
+            let failCount = 0;
+            const interval = setInterval(async () => {
+                try {
+                    const response = await fetch(`${BASE}/status/${jobId}`);
+                    if (!response.ok) {
+                        failCount++;
+                        if (failCount >= 5) {
+                            clearInterval(interval);
+                            alert('Server unreachable after multiple retries');
+                            reset();
+                        }
+                        return; // skip this poll, try again next interval
+                    }
+                    failCount = 0;
+                    const status = await response.json();
+
+                    if (status.status === 'completed') {
+                        clearInterval(interval);
+                        progressFill.style.width = '100%';
+
+                        if (mode === 'speech') {
+                            statusText.textContent = 'Complete! Loading transcription...';
+                            await loadTranscription(jobId);
+                        } else {
+                            statusText.textContent = 'Complete! Loading tracks...';
+                            await loadTracks(jobId);
+                        }
+                    } else if (status.status === 'failed') {
+                        clearInterval(interval);
+                        alert('Processing failed: ' + (status.error || 'Unknown error'));
+                        reset();
+                    } else {
+                        // Update progress animation
+                        const currentWidth = parseInt(progressFill.style.width);
+                        if (currentWidth < 90) {
+                            progressFill.style.width = (currentWidth + 5) + '%';
+                        }
+                    }
+                } catch (error) {
+                    failCount++;
+                    if (failCount >= 5) {
+                        clearInterval(interval);
+                        alert('Status check failed: ' + error.message);
+                        reset();
+                    }
+                    // otherwise silently retry on next interval
+                }
+            }, 2000);
+        }
+
+        async function loadTracks(jobId) {
+            try {
+                const response = await fetch(`${BASE}/tracks/${jobId}`);
+                const tracks = await response.json();
+
+                if (tracks.error) {
+                    alert('Failed to load tracks: ' + tracks.error);
+                    reset();
+                    return;
+                }
+
+                // Load each track into audio players
+                for (const [trackName, trackUrl] of Object.entries(tracks)) {
+                    const player = document.getElementById(`${trackName}Player`);
+                    if (player) {
+                        player.src = trackUrl;
+                    }
+                }
+
+                // Show tracks section
+                progressSection.style.display = 'none';
+                tracksSection.style.display = 'block';
+
+            } catch (error) {
+                alert('Failed to load tracks: ' + error.message);
+                reset();
+            }
+        }
+
+        async function loadTranscription(jobId) {
+            try {
+                const response = await fetch(`${BASE}/transcription/${jobId}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    alert('Failed to load transcription: ' + data.error);
+                    reset();
+                    return;
+                }
+
+                // Display full transcription
+                document.getElementById('fullTranscription').textContent = data.transcription;
+
+                // Display timestamped segments
+                const segmentsList = document.getElementById('segmentsList');
+                segmentsList.innerHTML = '';
+
+                data.segments.forEach((segment, index) => {
+                    const segmentDiv = document.createElement('div');
+                    segmentDiv.className = 'segment-item';
+                    const speaker = segment.speaker || 'Speaker';
+                    segmentDiv.innerHTML = `
+                        <div class="segment-header">
+                            <span class="segment-time">[${segment.start.toFixed(2)}s - ${segment.end.toFixed(2)}s]</span>
+                            <span class="segment-speaker">${speaker}</span>
+                        </div>
+                        <div class="segment-text">${segment.text}</div>
+                    `;
+                    segmentsList.appendChild(segmentDiv);
+                });
+
+                // Set up download button
+                document.getElementById('downloadTranscriptBtn').onclick = () => {
+                    window.location.href = data.download_url;
+                };
+
+                // Show transcription section
+                progressSection.style.display = 'none';
+                transcriptionSection.style.display = 'block';
+
+            } catch (error) {
+                alert('Failed to load transcription: ' + error.message);
+                reset();
+            }
+        }
+
+        // Track checkboxes for merging
+        const trackCheckboxes = document.querySelectorAll('.track-checkbox');
+        const mergeBtn = document.getElementById('mergeBtn');
+
+        trackCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                const selectedCount = document.querySelectorAll('.track-checkbox:checked').length;
+                mergeBtn.disabled = selectedCount < 2;
+            });
+        });
+
+        // Merge tracks
+        mergeBtn.addEventListener('click', async () => {
+            const selectedTracks = Array.from(document.querySelectorAll('.track-checkbox:checked'))
+                .map(cb => cb.dataset.track);
+
+            if (selectedTracks.length < 2) {
+                alert('Please select at least 2 tracks to merge');
+                return;
+            }
+
+            mergeBtn.disabled = true;
+            mergeBtn.textContent = 'Merging...';
+
+            try {
+                const response = await fetch(`${BASE}/merge/${currentJobId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ tracks: selectedTracks })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Download the merged file
+                    window.location.href = data.download_url;
+                    mergeBtn.textContent = 'Merge Successful!';
+
+                    // Reset checkboxes
+                    trackCheckboxes.forEach(cb => cb.checked = false);
+
+                    setTimeout(() => {
+                        mergeBtn.textContent = 'Merge Selected Tracks';
+                        mergeBtn.disabled = true;
+                    }, 2000);
+                } else {
+                    alert(data.error || 'Failed to merge tracks');
+                    mergeBtn.textContent = 'Merge Selected Tracks';
+                    mergeBtn.disabled = false;
+                }
+            } catch (error) {
+                alert('Error merging tracks: ' + error.message);
+                mergeBtn.textContent = 'Merge Selected Tracks';
+                mergeBtn.disabled = false;
+            }
+        });
+
+        // Download buttons
+        document.querySelectorAll('.download-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const trackName = e.target.dataset.track;
+                if (currentJobId) {
+                    window.location.href = `${BASE}/download/${currentJobId}/${trackName}`;
+                }
+            });
+        });
+
+        // Reset buttons
+        resetBtn.addEventListener('click', () => {
+            if (currentJobId) {
+                fetch(`${BASE}/cleanup/${currentJobId}`, { method: 'POST' });
+            }
+            reset();
+        });
+
+        resetTranscriptionBtn.addEventListener('click', () => {
+            if (currentJobId) {
+                fetch(`${BASE}/cleanup/${currentJobId}`, { method: 'POST' });
+            }
+            reset();
+        });
+
+        function reset() {
+            currentJobId = null;
+            uploadArea.style.display = 'flex';
+            document.getElementById('youtubeInput').style.display = 'block';
+            document.querySelector('.or-divider').style.display = 'flex';
+            document.getElementById('youtubeUrl').value = '';
+            progressSection.style.display = 'none';
+            tracksSection.style.display = 'none';
+            transcriptionSection.style.display = 'none';
+            progressFill.style.width = '0%';
+            fileInput.value = '';
+
+            // Clear audio players
+            document.querySelectorAll('audio').forEach(player => {
+                player.src = '';
+            });
+
+            // Clear transcription
+            document.getElementById('fullTranscription').textContent = '';
+            document.getElementById('segmentsList').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
