@@ -16,8 +16,12 @@ cd "$DIR/backend"
 gunicorn "app:create_app()" -c "$DIR/deploy/gunicorn.conf.py" &
 GUNICORN_PID=$!
 
-# Start cloudflare tunnel
-cloudflared tunnel --protocol http2 --url http://localhost:8000 &
+# Start cloudflare tunnel (named tunnel via TUNNEL_TOKEN from .env)
+if [ -z "${TUNNEL_TOKEN:-}" ]; then
+  echo "ERROR: TUNNEL_TOKEN not set in .env" >&2
+  exit 1
+fi
+cloudflared tunnel --protocol http2 --no-autoupdate run --token "$TUNNEL_TOKEN" &
 TUNNEL_PID=$!
 
 # Clean up both on exit
